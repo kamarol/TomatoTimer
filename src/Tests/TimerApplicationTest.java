@@ -1,14 +1,11 @@
 package Tests;
 
-import Main.Timer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Scanner;
 
-
-@DisplayName("Timer test example")
-public class TimerTest {
+@DisplayName("TimerApplication test example")
+public class TimerApplicationTest {
 
     @Test
     void firstTest() {
@@ -17,7 +14,7 @@ public class TimerTest {
 
     //@Test
 //    void secondTest() {
-//        Timer timer = new Timer();
+//        TimerApplication timer = new TimerApplication();
 //        timer.start();
 //        try {
 //            Thread.sleep(3000);
