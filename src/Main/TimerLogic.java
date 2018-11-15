@@ -36,4 +36,8 @@ public class TimerLogic {
     public boolean isRunning() {
         return running;
     }
+
+    public long getNanoSeconds() {
+        return System.nanoTime() - start_time;
+    }
 }
