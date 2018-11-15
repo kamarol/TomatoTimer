@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 public class TimerApplication extends Application {
     //    long start_time; // why is this long i forgot
@@ -41,10 +42,12 @@ public class TimerApplication extends Application {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
+//                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
+                        timerLbl.setText(formatInterval(timerLogic.getNanoSeconds()));
                     }
                 });
             }
+
 
             private void startTimerPolling() {
                 timerlogic = new TimerLogic();
@@ -84,6 +87,13 @@ public class TimerApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    static String formatInterval(long nanoSeconds) {
+        long hours = TimeUnit.NANOSECONDS.toHours(nanoSeconds);
+        long minutes = TimeUnit.NANOSECONDS.toMinutes(nanoSeconds - TimeUnit.HOURS.toNanos(hours));
+        long seconds = TimeUnit.NANOSECONDS.toSeconds(nanoSeconds - TimeUnit.HOURS.toNanos(hours) - TimeUnit.MINUTES.toNanos(minutes));
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
 }
