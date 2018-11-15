@@ -6,6 +6,7 @@ import java.util.Date;
 public class TimerLogic {
     boolean running = false; // i was here last at 2018-11-12 at 10:50am Monday
     long start_time = 0L;
+    long backlog = 0l;
 //    long current = 0L;
 
 
@@ -16,9 +17,11 @@ public class TimerLogic {
 
     public void startTimer() {
         System.out.println("..Starting timer");
-        resetTimer();
+//        resetTimer();
         running = true;
-        start_time = System.nanoTime();
+        System.out.println("backlog: " + Long.toString(backlog));
+        start_time = System.nanoTime() - backlog;
+//        backlog = 0L;
     }
 
     public int getSeconds() {
@@ -31,6 +34,7 @@ public class TimerLogic {
 
     public void stopTimer() {
         running = false;
+        resetTimer();
     }
 
     public boolean isRunning() {
@@ -38,6 +42,21 @@ public class TimerLogic {
     }
 
     public long getNanoSeconds() {
+        return getIntervalInNanoSeconds();
+    }
+
+    public long getIntervalInNanoSeconds() {
         return System.nanoTime() - start_time;
+    }
+
+    public void pauseTimer() {
+        backlog =  getIntervalInNanoSeconds();
+        running = false;
+    }
+
+    public void resume() {
+//        start_time += backlog;
+//        backlog = 0;
+        startTimer();
     }
 }

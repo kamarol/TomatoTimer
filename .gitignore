@@ -14,3 +14,5 @@ out/production/TomatoTimer/Main/TimerApplication\$2\.class
 out/production/TomatoTimer/Main/TimerLogic\.class
 
 out/production/TomatoTimer/Tests/TimerApplicationTest\.class
+
+*.class
