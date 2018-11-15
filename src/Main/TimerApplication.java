@@ -20,13 +20,6 @@ public class TimerApplication extends Application {
     Button startBtn, stopBtn;
     private static Label timerLbl;
 
-//    public void startTime() {
-//        start_time = System.currentTimeMillis();// start_time = current time
-//        gui = new TimerLogic();
-//        Thread t = new Thread(gui);
-//        t.start();
-//        // update gui if needed
-//    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -36,44 +29,15 @@ public class TimerApplication extends Application {
         startBtn = (Button) loader.getNamespace().get("startBtn");
         stopBtn = (Button) loader.getNamespace().get("stopBtn");
         timerLbl = (Label) loader.getNamespace().get("timerLabel");
-//        timerLbl.setText("k");
         startBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 startTimerPolling();
-//                Platform.runLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        GuiUpdateTimer(timerlogic); // what happens if you try to put a while loop here to update GUI and sleep it? Does it affect other things?
-//                    }
-//                });
-//                        GuiUpdateTimer(timerlogic); // what happens if you try to put a while loop here to update GUI and sleep it? Does it affect other things?
 
             }
 
             private void GuiUpdateTimer(TimerLogic timerLogic) {
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                while (timerlogic.isRunning()) {
-//                    System.out.println("GuiUpdateTimer run()");
-//                    updateLabelGUI("k");
-//                    Platform.runLater(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            System.out.println("egughghgh");
-////                            timerLbl.setText(Double.toString(timerlogic.getTimeInSeconds()));
-//                            updateLabelGUI("123");
-//                        }
-//                    });
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
+
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -83,15 +47,13 @@ public class TimerApplication extends Application {
             }
 
             private void startTimerPolling() {
-                TimerLogic timer = new TimerLogic();
-                Thread t1 = new Thread(timer);
-                t1.start();
+                timerlogic = new TimerLogic();
+                timerlogic.startTimer();
                 Thread t2 = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        while (true) {
-//                            int seconds = timer.getSeconds(); // putting variable declaration inside a loop?
-                            GuiUpdateTimer(timer);
+                        while (timerlogic.isRunning()) {
+                            GuiUpdateTimer(timerlogic);
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
@@ -101,8 +63,6 @@ public class TimerApplication extends Application {
                     }
                 });
                 t2.start();
-//                Thread t = new Thread(timerlogic);
-//                t.start(); // can there be more elegant/semantic way than just say start? // also make this into a function // this is called anonymous function? but it has a name
             }
         });
 
@@ -120,34 +80,7 @@ public class TimerApplication extends Application {
         System.out.println("updating guii");
         timerLbl.setText(s);
     }
-//    private class TimerLogic implements Runnable {
-//        private boolean execute;
-//
-//        public void run() {
-//            System.out.println(this.hashCode());
-//            this.execute = true;
-//            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm:ss");
-//            while (this.execute) {
-//                System.out.println(sdf.format(new Date(start_time))); // is this memory efficient?
-//                displayExecuteBool();
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        public void stopUpdatingGUI() {
-//            System.out.println(this.hashCode());
-//            this.execute = false;
-//            displayExecuteBool();
-//        }
-//
-//        public void displayExecuteBool() {
-//            System.out.println(this.execute);
-//        }
-//    }
+
 
     public static void main(String[] args) {
         launch(args);
