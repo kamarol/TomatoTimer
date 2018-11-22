@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,17 @@ public class TimerApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Connection c = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:test3.db");
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Opened database successfully");
+
+
         timerlogic = new TimerLogic();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/tomatoUI.fxml"));
         Parent root = loader.load();
