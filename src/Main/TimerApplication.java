@@ -2,6 +2,8 @@ package Main;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -21,6 +24,7 @@ public class TimerApplication extends Application {
     //    long start_time; // why is this long i forgot
     private TimerLogic timerlogic;
     Button startBtn, stopBtn, pauseBtn, resumeBtn;
+    ToggleButton countdownToggleBtn;
     private static Label timerLbl;
 
 
@@ -45,6 +49,7 @@ public class TimerApplication extends Application {
         timerLbl = (Label) loader.getNamespace().get("timerLabel");
         pauseBtn = (Button) loader.getNamespace().get("pauseBtn");
         resumeBtn = (Button) loader.getNamespace().get("resumeBtn");
+        countdownToggleBtn = (ToggleButton) loader.getNamespace().get("countdownToggle");
         startBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -74,6 +79,19 @@ public class TimerApplication extends Application {
             public void handle(ActionEvent event) {
 //                timerlogic.resume();
                 startTimerPolling();
+            }
+        });
+
+        countdownToggleBtn.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                Boolean toggled = newValue;
+//                System.out.println(oldValue.toString() + " " + newValue.toString());
+                if (!toggled) {
+                    System.out.println("Not toggled!");
+                } else {
+                    System.out.println("toggled!");
+                }
             }
         });
         Scene scene = new Scene(root);
