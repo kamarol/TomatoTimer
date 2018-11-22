@@ -26,7 +26,7 @@ public class TimerApplication extends Application {
     Button startBtn, stopBtn, pauseBtn, resumeBtn;
     ToggleButton countdownToggleBtn;
     private static Label timerLbl;
-
+    Boolean countdown = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -89,8 +89,10 @@ public class TimerApplication extends Application {
 //                System.out.println(oldValue.toString() + " " + newValue.toString());
                 if (!toggled) {
                     System.out.println("Not toggled!");
+                    countdown = false;
                 } else {
                     System.out.println("toggled!");
+                    countdown = true;
                 }
             }
         });
@@ -117,13 +119,20 @@ public class TimerApplication extends Application {
         t2.start();
     }
 
+
     private void GuiUpdateTimer(TimerLogic timerLogic) {
 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
 //                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
-                timerLbl.setText(formatInterval(timerLogic.getNanoSeconds()));
+                if (countdown) {
+                    final Long _25MINUTES = TimeUnit.MINUTES.toNanos(25);
+                    timerLbl.setText(formatInterval(_25MINUTES - timerLogic.getNanoSeconds()));
+                } else {
+                    timerLbl.setText(formatInterval(timerLogic.getNanoSeconds()));
+                }
+
             }
         });
     }
