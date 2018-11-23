@@ -29,6 +29,8 @@ public class TimerApplication extends Application {
     private static Label timerLbl;
     Boolean countdown = false;
     ProgressIndicator tomatoIndicator;
+    final static int TOMATO_SECONDS = 10;
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -129,20 +131,23 @@ public class TimerApplication extends Application {
             @Override
             public void run() {
                 Long timerUIvalue = 0L;
-                final Long _25MINUTES = TimeUnit.MINUTES.toNanos(25);
+                final Long tomatoNanoSeconds = TimeUnit.SECONDS.toNanos(TOMATO_SECONDS);
 //                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
                 if (countdown) {
-                    timerUIvalue = _25MINUTES - timerLogic.getNanoSeconds();
+                    timerUIvalue = tomatoNanoSeconds - timerLogic.getNanoSeconds();
                     timerLbl.setText(formatInterval(timerUIvalue));
-                    tomatoIndicator.setProgress(((double)timerUIvalue) / (double)_25MINUTES);
-                    System.out.printf("%s\n", ((double)timerUIvalue) / (double)_25MINUTES); // 1.0 - ((double)timerUIvalue / (double)_25MINUTES)
+                    tomatoIndicator.setProgress(((double)timerUIvalue) / (double)tomatoNanoSeconds);
+                    System.out.printf("%s\n", ((double)timerUIvalue) / (double)tomatoNanoSeconds); // 1.0 - ((double)timerUIvalue / (double)_25MINUTES)
 //                    System.out.println((double)(timerUIvalue / _25MINUTES));
 //                    System.out.printf("%s %s %s", timerUIvalue, _25MINUTES, (double)timerUIvalue/(double)_25MINUTES); //souf daym
                 } else {
                     timerUIvalue = timerLogic.getNanoSeconds();
                     timerLbl.setText(formatInterval(timerUIvalue));
-                    tomatoIndicator.setProgress((double)timerUIvalue / (double)_25MINUTES);
-                    System.out.printf("%s\n", (double)timerUIvalue / (double)_25MINUTES);
+                    tomatoIndicator.setProgress((double)timerUIvalue / (double)tomatoNanoSeconds);
+                    System.out.printf("%s\n", (double)timerUIvalue / (double)tomatoNanoSeconds);
+                }
+                if (timerUIvalue > tomatoNanoSeconds) {
+                    System.out.println("Finished 10 Seconds!");
                 }
             }
         });
