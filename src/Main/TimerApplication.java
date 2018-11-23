@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 
@@ -27,6 +28,7 @@ public class TimerApplication extends Application {
     ToggleButton countdownToggleBtn;
     private static Label timerLbl;
     Boolean countdown = false;
+    ProgressIndicator tomatoIndicator;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -50,6 +52,7 @@ public class TimerApplication extends Application {
         pauseBtn = (Button) loader.getNamespace().get("pauseBtn");
         resumeBtn = (Button) loader.getNamespace().get("resumeBtn");
         countdownToggleBtn = (ToggleButton) loader.getNamespace().get("countdownToggle");
+        tomatoIndicator = (ProgressIndicator) loader.getNamespace().get("tomatoIndicator");
         startBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -125,14 +128,22 @@ public class TimerApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                Long timerUIvalue = 0L;
+                final Long _25MINUTES = TimeUnit.MINUTES.toNanos(25);
 //                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
                 if (countdown) {
-                    final Long _25MINUTES = TimeUnit.MINUTES.toNanos(25);
-                    timerLbl.setText(formatInterval(_25MINUTES - timerLogic.getNanoSeconds()));
+                    timerUIvalue = _25MINUTES - timerLogic.getNanoSeconds();
+                    timerLbl.setText(formatInterval(timerUIvalue));
+                    tomatoIndicator.setProgress(((double)timerUIvalue) / (double)_25MINUTES);
+                    System.out.printf("%s\n", ((double)timerUIvalue) / (double)_25MINUTES); // 1.0 - ((double)timerUIvalue / (double)_25MINUTES)
+//                    System.out.println((double)(timerUIvalue / _25MINUTES));
+//                    System.out.printf("%s %s %s", timerUIvalue, _25MINUTES, (double)timerUIvalue/(double)_25MINUTES); //souf daym
                 } else {
-                    timerLbl.setText(formatInterval(timerLogic.getNanoSeconds()));
+                    timerUIvalue = timerLogic.getNanoSeconds();
+                    timerLbl.setText(formatInterval(timerUIvalue));
+                    tomatoIndicator.setProgress((double)timerUIvalue / (double)_25MINUTES);
+                    System.out.printf("%s\n", (double)timerUIvalue / (double)_25MINUTES);
                 }
-
             }
         });
     }
