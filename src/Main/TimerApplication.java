@@ -17,10 +17,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -116,6 +113,7 @@ public class TimerApplication extends Application {
                 try {
                     Parent root = loader.load();
                     graphStage.setScene(new Scene(root));
+                    setupStatsScene(loader);
                     graphStage.show();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -208,6 +206,24 @@ public class TimerApplication extends Application {
     }
 
     // Graph UI functions // TODO: Separate this section into another class
+
+    private void setupStatsScene(FXMLLoader loader) {
+        String SQL = String.format("select sum(duration) as 'duration' from Tomato where startDate >= date('now', 'localtime', 'start of day');"); // TODO: Change to prepared statements
+        Connection c;
+        try {
+            c = DriverManager.getConnection("jdbc:sqlite:test3.db");
+            Statement stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery(SQL);
+            Label tomatoToday;
+            tomatoToday = (Label) loader.getNamespace().get("tomatoTodayLabel");
+            int sumOfDuration = rs.getInt(1);
+            String sumOfDurationUIText = String.format("%d:%02d:%02d", sumOfDuration / 3600, (sumOfDuration % 3600) / 60, (sumOfDuration % 60));
+            tomatoToday.setText(sumOfDurationUIText);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String[] args) {
         launch(args);
