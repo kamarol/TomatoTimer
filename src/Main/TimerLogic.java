@@ -33,7 +33,7 @@ public class TimerLogic {
     public int getSeconds() {
         System.out.println("fetching seconds..");
         System.out.println(System.nanoTime() - start_time);
-        int seconds = Math.toIntExact((System.nanoTime() - start_time) / 1000000000);
+        int seconds = Math.toIntExact((System.nanoTime() - start_time) / 1000000000); // why is there Math.toIntExact?
         System.out.println(seconds);
         return  seconds;
     }

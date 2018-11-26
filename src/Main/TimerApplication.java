@@ -18,6 +18,11 @@ import javafx.stage.Stage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +34,7 @@ public class TimerApplication extends Application {
     private static Label timerLbl;
     Boolean countdown = false;
     ProgressIndicator tomatoIndicator;
-    final static int TOMATO_SECONDS = 10;
+    final static int TOMATO_SECONDS = 5;
 
 
     @Override
@@ -147,7 +152,26 @@ public class TimerApplication extends Application {
                     System.out.printf("%s\n", (double)timerUIvalue / (double)tomatoNanoSeconds);
                 }
                 if (timerUIvalue > tomatoNanoSeconds) {
-                    System.out.println("Finished 10 Seconds!");
+                    System.out.println("Finished 10 Seconds!"); //TODO: Change to x seconds
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date d1, d2;
+                    d1 = new Date(System.currentTimeMillis() - (timerLogic.getIntervalInNanoSeconds()/1000000));
+                    d2 = new Date(System.currentTimeMillis());
+                    System.out.println(df.format(d1));
+                    System.out.println(df.format(d2));
+                    String SQL = String.format("INSERT INTO `Tomato` (startDate, endDate, duration) VALUES ('%s', '%s', %d);", df.format(d1), df.format(d2), timerlogic.getSeconds()); // TODO: Change to prepared statements
+                    String SQL2 = String.format("INSERT INTO `TomatoTags` (startDate, tag) VALUES ('%s', '%s');", df.format(d1), "completed");
+                    System.out.println(SQL);
+                    try {
+                        Connection c;
+                        c = DriverManager.getConnection("jdbc:sqlite:test3.db");
+                        Statement stmt = c.createStatement();
+                        stmt.execute(SQL);
+                        stmt.execute(SQL2);
+                        timerlogic.stopTimer();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
