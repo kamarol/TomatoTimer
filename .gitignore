@@ -16,3 +16,11 @@ out/production/TomatoTimer/Main/TimerLogic\.class
 out/production/TomatoTimer/Tests/TimerApplicationTest\.class
 
 *.class
+
+test\.db
+
+test2\.db
+
+out/production/TomatoTimer/assets/statsUI\.fxml
+
+out/production/TomatoTimer/assets/tomatoUI\.fxml
