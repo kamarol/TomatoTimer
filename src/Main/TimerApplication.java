@@ -16,6 +16,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class TimerApplication extends Application {
     //    long start_time; // why is this long i forgot
     private TimerLogic timerlogic;
-    Button startBtn, stopBtn, pauseBtn, resumeBtn;
+    Button startBtn, stopBtn, pauseBtn, resumeBtn, statsBtn;
     ToggleButton countdownToggleBtn;
     private static Label timerLbl;
     Boolean countdown = false;
@@ -60,6 +61,7 @@ public class TimerApplication extends Application {
         resumeBtn = (Button) loader.getNamespace().get("resumeBtn");
         countdownToggleBtn = (ToggleButton) loader.getNamespace().get("countdownToggle");
         tomatoIndicator = (ProgressIndicator) loader.getNamespace().get("tomatoIndicator");
+        statsBtn = (Button) loader.getNamespace().get("statsBtn");
         startBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -104,6 +106,21 @@ public class TimerApplication extends Application {
                     System.out.println("toggled!");
                     countdown = true;
                 }
+            }
+        });
+        statsBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Stage graphStage = new Stage();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/assets/statsUI.fxml"));
+                try {
+                    Parent root = loader.load();
+                    graphStage.setScene(new Scene(root));
+                    graphStage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
         Scene scene = new Scene(root);
@@ -183,15 +200,18 @@ public class TimerApplication extends Application {
     }
 
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     static String formatInterval(long nanoSeconds) {
         long hours = TimeUnit.NANOSECONDS.toHours(nanoSeconds);
         long minutes = TimeUnit.NANOSECONDS.toMinutes(nanoSeconds - TimeUnit.HOURS.toNanos(hours));
         long seconds = TimeUnit.NANOSECONDS.toSeconds(nanoSeconds - TimeUnit.HOURS.toNanos(hours) - TimeUnit.MINUTES.toNanos(minutes));
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
+
+    // Graph UI functions // TODO: Separate this section into another class
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
 
 }
