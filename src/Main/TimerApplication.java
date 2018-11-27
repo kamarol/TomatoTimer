@@ -291,24 +291,64 @@ public class TimerApplication extends Application {
     // Graph UI functions // TODO: Separate this section into another class
 
     private void setupStatsScene(FXMLLoader loader) {
-        String SQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
-        String SQL2 = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
+        String tomatoDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
+        String breakDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
+        String noOfBreaksTodaySQL = "select count(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');";
+        String noOfTomatoTodaySQL ="select count(Tomato.startDate) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');";
+        // total stats
+        String totalTomatoDurationSQL = "select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate;";
+        String totalBreakDurationSQL = "select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate;";
+        String totalNoOFBreaksSQL = "select count(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate;";
+        String totalNoOfTomatoSQL = "select count(Tomato.startDate) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate;";
         Connection c;
         try {
             c = DriverManager.getConnection("jdbc:sqlite:test3.db");
             Statement stmt = c.createStatement(); // TODO: can i re-use this?
-            ResultSet rs = stmt.executeQuery(SQL);
+            ResultSet rs = stmt.executeQuery(tomatoDurationTodaySQL);
             Statement stmt2 = c.createStatement();
-            ResultSet rs2 = stmt2.executeQuery(SQL2);
-            Label tomatoToday, breaksTodayLabel;
-            tomatoToday = (Label) loader.getNamespace().get("tomatoTodayLabel");
+            ResultSet rs2 = stmt2.executeQuery(breakDurationTodaySQL);
+            Label tomatoTodayLabel, breaksTodayLabel, breaksDurationTodayLabel, tomatoDurationTodayLabel, totalTomatoLabel, totalBreaksLabel, totalDurationLabel, totalBreakDurationLabel;
+            tomatoTodayLabel = (Label) loader.getNamespace().get("tomatoTodayLabel");
             breaksTodayLabel = (Label) loader.getNamespace().get("breaksTodayLabel");
+            breaksDurationTodayLabel = (Label) loader.getNamespace().get("durationTodayLabel"); // TODO: Change in FXML
+            tomatoDurationTodayLabel = (Label) loader.getNamespace().get("tomatoDurationTodayLabel");
+
+            totalTomatoLabel = (Label) loader.getNamespace().get("totalTomatoLabel");
+            totalBreaksLabel = (Label) loader.getNamespace().get("totalBreaksLabel");
+            totalDurationLabel = (Label) loader.getNamespace().get("totalDurationLabel");
+            totalBreakDurationLabel = (Label) loader.getNamespace().get("totalBreakDurationLabel");
             int sumOfDuration = rs.getInt(1);
-            int sumOfDurationBreakToday = rs2.getInt(1);
-            String sumOfDurationUIText = String.format("%d:%02d:%02d", sumOfDuration / 3600, (sumOfDuration % 3600) / 60, (sumOfDuration % 60));
-            String sumOfDurationBreakTodayUIText = String.format("%d:%02d:%02d", sumOfDurationBreakToday / 3600, (sumOfDurationBreakToday % 3600) / 60, (sumOfDurationBreakToday % 60));
-            tomatoToday.setText(sumOfDurationUIText);
-            breaksTodayLabel.setText(sumOfDurationBreakTodayUIText);
+//            String tomatoTodayLabelUIText = String.format("%d:%02d:%02d", sumOfDuration / 3600, (sumOfDuration % 3600) / 60, (sumOfDuration % 60));
+//            int sumOfDurationBreakToday = rs2.getInt(1);
+//            String breaksTodayLabelUIText = String.format("%d:%02d:%02d", sumOfDurationBreakToday / 3600, (sumOfDurationBreakToday % 3600) / 60, (sumOfDurationBreakToday % 60));
+            rs = c.createStatement().executeQuery(noOfTomatoTodaySQL);
+            String tomatoTodayLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(noOfBreaksTodaySQL);
+            String breaksTodayLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(breakDurationTodaySQL);
+            String durationTodayLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(tomatoDurationTodaySQL);
+            String tomatoDurationTodayLabelUIText = Integer.toString(rs.getInt(1));
+
+
+            rs = c.createStatement().executeQuery(totalNoOfTomatoSQL);
+            String totalTomatoLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(totalNoOFBreaksSQL);
+            String totalBreaksLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(totalTomatoDurationSQL);
+            String totalDurationLabelUIText = Integer.toString(rs.getInt(1));
+            rs = c.createStatement().executeQuery(totalBreakDurationSQL);
+            String totalBreakDurationLabelUIText = Integer.toString(rs.getInt(1));
+
+            tomatoTodayLabel.setText(tomatoTodayLabelUIText);
+            breaksTodayLabel.setText(breaksTodayLabelUIText);
+            breaksDurationTodayLabel.setText(durationTodayLabelUIText);
+            tomatoDurationTodayLabel.setText(tomatoDurationTodayLabelUIText);
+
+            totalTomatoLabel.setText(totalTomatoLabelUIText);
+            totalBreaksLabel.setText(totalBreaksLabelUIText);
+            totalDurationLabel.setText(totalDurationLabelUIText);
+            totalBreakDurationLabel.setText(totalBreakDurationLabelUIText);
         } catch (SQLException e) {
             e.printStackTrace();
         }
