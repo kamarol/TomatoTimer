@@ -291,8 +291,8 @@ public class TimerApplication extends Application {
     // Graph UI functions // TODO: Separate this section into another class
 
     private void setupStatsScene(FXMLLoader loader) {
-        String tomatoDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
-        String breakDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
+        String tomatoDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');"); // TODO: Change to prepared statements
+        String breakDurationTodaySQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');"); // TODO: Change to prepared statements
         String noOfBreaksTodaySQL = "select count(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');";
         String noOfTomatoTodaySQL ="select count(Tomato.startDate) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'localtime', 'start of day');";
         // total stats
@@ -321,14 +321,15 @@ public class TimerApplication extends Application {
 //            String tomatoTodayLabelUIText = String.format("%d:%02d:%02d", sumOfDuration / 3600, (sumOfDuration % 3600) / 60, (sumOfDuration % 60));
 //            int sumOfDurationBreakToday = rs2.getInt(1);
 //            String breaksTodayLabelUIText = String.format("%d:%02d:%02d", sumOfDurationBreakToday / 3600, (sumOfDurationBreakToday % 3600) / 60, (sumOfDurationBreakToday % 60));
+            int timeCalculation = 0;
             rs = c.createStatement().executeQuery(noOfTomatoTodaySQL);
             String tomatoTodayLabelUIText = Integer.toString(rs.getInt(1));
             rs = c.createStatement().executeQuery(noOfBreaksTodaySQL);
             String breaksTodayLabelUIText = Integer.toString(rs.getInt(1));
             rs = c.createStatement().executeQuery(breakDurationTodaySQL);
-            String durationTodayLabelUIText = Integer.toString(rs.getInt(1));
+            String durationTodayLabelUIText = timeFormatter(rs.getInt(1)); //does static functions need to have certain naming scheme? Like capitalization?
             rs = c.createStatement().executeQuery(tomatoDurationTodaySQL);
-            String tomatoDurationTodayLabelUIText = Integer.toString(rs.getInt(1));
+            String tomatoDurationTodayLabelUIText = timeFormatter(rs.getInt(1));
 
 
             rs = c.createStatement().executeQuery(totalNoOfTomatoSQL);
@@ -336,9 +337,9 @@ public class TimerApplication extends Application {
             rs = c.createStatement().executeQuery(totalNoOFBreaksSQL);
             String totalBreaksLabelUIText = Integer.toString(rs.getInt(1));
             rs = c.createStatement().executeQuery(totalTomatoDurationSQL);
-            String totalDurationLabelUIText = Integer.toString(rs.getInt(1));
+            String totalDurationLabelUIText = timeFormatter(rs.getInt(1));
             rs = c.createStatement().executeQuery(totalBreakDurationSQL);
-            String totalBreakDurationLabelUIText = Integer.toString(rs.getInt(1));
+            String totalBreakDurationLabelUIText = timeFormatter(rs.getInt(1));
 
             tomatoTodayLabel.setText(tomatoTodayLabelUIText);
             breaksTodayLabel.setText(breaksTodayLabelUIText);
@@ -352,6 +353,10 @@ public class TimerApplication extends Application {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String timeFormatter(int seconds) {
+        return String.format("%d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
     }
 
 
