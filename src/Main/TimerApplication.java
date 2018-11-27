@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class TimerApplication extends Application {
     //    long start_time; // why is this long i forgot
     private TimerLogic timerlogic;
-    Button startBtn, stopBtn, pauseBtn, resumeBtn, statsBtn;
+    Button startBtn, stopBtn, pauseBtn, resumeBtn, statsBtn, break1Button, break2Button;
     ToggleButton countdownToggleBtn;
     private static Label timerLbl;
     Boolean countdown = false;
@@ -59,6 +59,8 @@ public class TimerApplication extends Application {
         countdownToggleBtn = (ToggleButton) loader.getNamespace().get("countdownToggle");
         tomatoIndicator = (ProgressIndicator) loader.getNamespace().get("tomatoIndicator");
         statsBtn = (Button) loader.getNamespace().get("statsBtn");
+        break1Button = (Button) loader.getNamespace().get("break1Button");
+        break2Button = (Button) loader.getNamespace().get("button2Break"); // TODO: Change to be consistent
         startBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -121,6 +123,22 @@ public class TimerApplication extends Application {
 
             }
         });
+
+        break1Button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // should be similar to start
+                startTimerPollingBreak(5000);
+
+            }
+        });
+        break2Button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                startTimerPollingBreak(10000);
+            }
+        });
+
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -133,6 +151,24 @@ public class TimerApplication extends Application {
             public void run() {
                 while (timerlogic.isRunning()) {
                     GuiUpdateTimer(timerlogic);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t2.start();
+    }
+
+    private void startTimerPollingBreak(long miliseconds) {
+        timerlogic.startTimer();
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (timerlogic.isRunning()) {
+                    GuiUpdateTimerBreak(timerlogic, miliseconds);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -192,6 +228,53 @@ public class TimerApplication extends Application {
         });
     }
 
+    private void GuiUpdateTimerBreak(TimerLogic timerLogic, long miliseconds) {  // TODO : check if mili should be stored as long?
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Long timerUIvalue = 0L;
+                final Long tomatoNanoSeconds = TimeUnit.MILLISECONDS.toNanos(miliseconds);
+//                        timerLbl.setText(Integer.toString(timerLogic.getSeconds()));
+                if (countdown) {
+                    timerUIvalue = tomatoNanoSeconds - timerLogic.getNanoSeconds();
+                    timerLbl.setText(formatInterval(timerUIvalue));
+                    tomatoIndicator.setProgress(((double)timerUIvalue) / (double)tomatoNanoSeconds);
+                    System.out.printf("%s\n", ((double)timerUIvalue) / (double)tomatoNanoSeconds); // 1.0 - ((double)timerUIvalue / (double)_25MINUTES)
+//                    System.out.println((double)(timerUIvalue / _25MINUTES));
+//                    System.out.printf("%s %s %s", timerUIvalue, _25MINUTES, (double)timerUIvalue/(double)_25MINUTES); //souf daym
+                } else {
+                    timerUIvalue = timerLogic.getNanoSeconds();
+                    timerLbl.setText(formatInterval(timerUIvalue));
+                    tomatoIndicator.setProgress((double)timerUIvalue / (double)tomatoNanoSeconds);
+                    System.out.printf("%s\n", (double)timerUIvalue / (double)tomatoNanoSeconds);
+                }
+                if (timerUIvalue > tomatoNanoSeconds) {
+                    System.out.println("Finished 10 Seconds!"); //TODO: Change to x seconds
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date d1, d2;
+                    d1 = new Date(System.currentTimeMillis() - (timerLogic.getIntervalInNanoSeconds()/1000000));
+                    d2 = new Date(System.currentTimeMillis());
+                    System.out.println(df.format(d1));
+                    System.out.println(df.format(d2));
+                    String SQL = String.format("INSERT INTO `Tomato` (startDate, endDate, duration) VALUES ('%s', '%s', %d);", df.format(d1), df.format(d2), timerlogic.getSeconds()); // TODO: Change to prepared statements
+                    String SQL2 = String.format("INSERT INTO `TomatoTags` (startDate, tag) VALUES ('%s', '%s');", df.format(d1), ("break"));
+                    System.out.println(SQL);
+                    try {
+                        Connection c;
+                        c = DriverManager.getConnection("jdbc:sqlite:test3.db");
+                        Statement stmt = c.createStatement();
+                        stmt.execute(SQL);
+                        stmt.execute(SQL2);
+                        timerlogic.stopTimer();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
     private void updateLabelGUI(String s) {
         System.out.println("updating guii");
         timerLbl.setText(s);
@@ -208,17 +291,24 @@ public class TimerApplication extends Application {
     // Graph UI functions // TODO: Separate this section into another class
 
     private void setupStatsScene(FXMLLoader loader) {
-        String SQL = String.format("select sum(duration) as 'duration' from Tomato where startDate >= date('now', 'localtime', 'start of day');"); // TODO: Change to prepared statements
+        String SQL = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'completed') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
+        String SQL2 = String.format("select sum(Tomato.duration) from Tomato JOIN (select * from TomatoTags where tag = 'break') as TomatoTags ON Tomato.startDate = TomatoTags.startDate where Tomato.startDate >= date('now', 'start of day');"); // TODO: Change to prepared statements
         Connection c;
         try {
             c = DriverManager.getConnection("jdbc:sqlite:test3.db");
-            Statement stmt = c.createStatement();
+            Statement stmt = c.createStatement(); // TODO: can i re-use this?
             ResultSet rs = stmt.executeQuery(SQL);
-            Label tomatoToday;
+            Statement stmt2 = c.createStatement();
+            ResultSet rs2 = stmt2.executeQuery(SQL2);
+            Label tomatoToday, breaksTodayLabel;
             tomatoToday = (Label) loader.getNamespace().get("tomatoTodayLabel");
+            breaksTodayLabel = (Label) loader.getNamespace().get("breaksTodayLabel");
             int sumOfDuration = rs.getInt(1);
+            int sumOfDurationBreakToday = rs2.getInt(1);
             String sumOfDurationUIText = String.format("%d:%02d:%02d", sumOfDuration / 3600, (sumOfDuration % 3600) / 60, (sumOfDuration % 60));
+            String sumOfDurationBreakTodayUIText = String.format("%d:%02d:%02d", sumOfDurationBreakToday / 3600, (sumOfDurationBreakToday % 3600) / 60, (sumOfDurationBreakToday % 60));
             tomatoToday.setText(sumOfDurationUIText);
+            breaksTodayLabel.setText(sumOfDurationBreakTodayUIText);
         } catch (SQLException e) {
             e.printStackTrace();
         }
